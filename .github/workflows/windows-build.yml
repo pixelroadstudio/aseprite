@@ -47,6 +47,15 @@ jobs:
         7z x skia.zip
         del skia.zip
 
+    # Download OpenSSL DLLs
+    - name: Download OpenSSL
+      shell: cmd
+      run: |
+        curl -L -o openssl.zip https://github.com/windowsssl/binaries/raw/master/openssl-1.1.1u-win64.zip
+        7z x openssl.zip
+        copy openssl-1.1\x64\bin\libcrypto-1_1-x64.dll deps\skia\
+        copy openssl-1.1\x64\bin\libssl-1_1-x64.dll deps\skia\
+
     - name: Create Build Directory
       run: mkdir build
       
@@ -80,6 +89,10 @@ jobs:
         copy build\bin\aseprite.exe dist\
         if exist build\bin\*.dll copy build\bin\*.dll dist\
         if exist deps\skia\*.dll copy deps\skia\*.dll dist\
+        if exist "C:\Windows\System32\msvcp140.dll" copy "C:\Windows\System32\msvcp140.dll" dist\
+        if exist "C:\Windows\System32\vcruntime140.dll" copy "C:\Windows\System32\vcruntime140.dll" dist\
+        if exist "C:\Windows\System32\vcruntime140_1.dll" copy "C:\Windows\System32\vcruntime140_1.dll" dist\
+        echo "Contents of dist directory:"
         dir dist
 
     - name: Upload Build Artifacts
