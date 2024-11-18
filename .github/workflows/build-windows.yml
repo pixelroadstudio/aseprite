@@ -32,11 +32,15 @@ jobs:
       with:
         python-version: '3.x'
 
-    # Download pre-built Skia from Aseprite's servers
+    # Download and setup Skia for Windows
     - name: Download Skia
+      shell: cmd
       run: |
-        python -m pip install requests
-        python deps/skia/download.py
+        mkdir deps\skia
+        cd deps\skia
+        curl -L -o skia.zip https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Windows-Release-x64.zip
+        7z x skia.zip
+        del skia.zip
 
     - name: Create Build Directory
       run: mkdir build
@@ -47,7 +51,7 @@ jobs:
         cmake -G Ninja `
           -DCMAKE_BUILD_TYPE=RelWithDebInfo `
           -DLAF_BACKEND=skia `
-          -DSKIA_DIR=../deps/skia `
+          -DSKIA_DIR=${{ github.workspace }}/deps/skia `
           -DSKIA_RELEASE=true `
           ..
 
