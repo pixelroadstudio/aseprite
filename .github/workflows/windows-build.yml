@@ -47,14 +47,17 @@ jobs:
         7z x skia.zip
         del skia.zip
 
-    # Download OpenSSL DLLs
-    - name: Download OpenSSL
+    # Install vcpkg and OpenSSL
+    - name: Install OpenSSL
       shell: cmd
       run: |
-        curl -L -o openssl.zip https://github.com/windowsssl/binaries/raw/master/openssl-1.1.1u-win64.zip
-        7z x openssl.zip
-        copy openssl-1.1\x64\bin\libcrypto-1_1-x64.dll deps\skia\
-        copy openssl-1.1\x64\bin\libssl-1_1-x64.dll deps\skia\
+        git clone https://github.com/Microsoft/vcpkg.git
+        cd vcpkg
+        bootstrap-vcpkg.bat
+        vcpkg install openssl:x64-windows
+        mkdir ..\deps\openssl
+        copy installed\x64-windows\bin\libcrypto-3-x64.dll ..\deps\openssl\
+        copy installed\x64-windows\bin\libssl-3-x64.dll ..\deps\openssl\
 
     - name: Create Build Directory
       run: mkdir build
@@ -89,6 +92,7 @@ jobs:
         copy build\bin\aseprite.exe dist\
         if exist build\bin\*.dll copy build\bin\*.dll dist\
         if exist deps\skia\*.dll copy deps\skia\*.dll dist\
+        if exist deps\openssl\*.dll copy deps\openssl\*.dll dist\
         if exist "C:\Windows\System32\msvcp140.dll" copy "C:\Windows\System32\msvcp140.dll" dist\
         if exist "C:\Windows\System32\vcruntime140.dll" copy "C:\Windows\System32\vcruntime140.dll" dist\
         if exist "C:\Windows\System32\vcruntime140_1.dll" copy "C:\Windows\System32\vcruntime140_1.dll" dist\
