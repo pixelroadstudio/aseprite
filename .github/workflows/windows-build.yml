@@ -1,11 +1,14 @@
-name: Windows Build
+name: Build Aseprite for Windows
 
 on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  build-windows:
-    name: Build for Windows
+  build:
     runs-on: windows-latest
     
     steps:
