@@ -89,19 +89,21 @@ jobs:
       shell: cmd
       run: |
         mkdir dist
-        copy build\bin\aseprite.exe dist\
-        if exist build\bin\*.dll copy build\bin\*.dll dist\
-        if exist deps\skia\*.dll copy deps\skia\*.dll dist\
-        if exist deps\openssl\*.dll copy deps\openssl\*.dll dist\
-        if exist "C:\Windows\System32\msvcp140.dll" copy "C:\Windows\System32\msvcp140.dll" dist\
-        if exist "C:\Windows\System32\vcruntime140.dll" copy "C:\Windows\System32\vcruntime140.dll" dist\
-        if exist "C:\Windows\System32\vcruntime140_1.dll" copy "C:\Windows\System32\vcruntime140_1.dll" dist\
+        xcopy /E /I /Y build\bin dist\bin
+        xcopy /E /I /Y data dist\data
+        if exist deps\skia\*.dll copy deps\skia\*.dll dist\bin\
+        if exist deps\openssl\*.dll copy deps\openssl\*.dll dist\bin\
+        if exist "C:\Windows\System32\msvcp140.dll" copy "C:\Windows\System32\msvcp140.dll" dist\bin\
+        if exist "C:\Windows\System32\vcruntime140.dll" copy "C:\Windows\System32\vcruntime140.dll" dist\bin\
+        if exist "C:\Windows\System32\vcruntime140_1.dll" copy "C:\Windows\System32\vcruntime140_1.dll" dist\bin\
+        echo "Creating portable config file..."
+        echo { "portable": true } > dist\aseprite.ini
         echo "Contents of dist directory:"
-        dir dist
+        dir /s dist
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: aseprite-windows
-        path: dist\*
+        name: aseprite-windows-portable
+        path: dist
         if-no-files-found: error
