@@ -1,10 +1,6 @@
 name: Build Aseprite for Windows
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -20,6 +16,11 @@ jobs:
 
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup Visual Studio Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
 
     - name: Setup CMake
       uses: lukka/get-cmake@latest
@@ -47,19 +48,23 @@ jobs:
       
     - name: Configure CMake
       working-directory: build
+      shell: cmd
       run: |
-        cmake -G Ninja `
-          -DCMAKE_BUILD_TYPE=RelWithDebInfo `
-          -DLAF_BACKEND=skia `
-          -DSKIA_DIR=${{ github.workspace }}/deps/skia `
-          -DSKIA_RELEASE=true `
-          -DENABLE_TESTS=OFF `
-          -DENABLE_UI=ON `
-          -DENABLE_UPDATER=OFF `
+        cmake -G Ninja ^
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo ^
+          -DLAF_BACKEND=skia ^
+          -DSKIA_DIR=%CD%/../deps/skia ^
+          -DSKIA_RELEASE=true ^
+          -DENABLE_TESTS=OFF ^
+          -DENABLE_UI=ON ^
+          -DENABLE_UPDATER=OFF ^
+          -DCMAKE_C_COMPILER=cl ^
+          -DCMAKE_CXX_COMPILER=cl ^
           ..
 
     - name: Build Aseprite
       working-directory: build
+      shell: cmd
       run: |
         ninja aseprite
         dir bin
