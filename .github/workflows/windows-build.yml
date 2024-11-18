@@ -1,10 +1,11 @@
-name: Build Aseprite for Windows
+name: Windows Build
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-windows:
+    name: Build for Windows
     runs-on: windows-latest
     
     steps:
