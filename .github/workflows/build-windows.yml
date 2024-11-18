@@ -53,22 +53,29 @@ jobs:
           -DLAF_BACKEND=skia `
           -DSKIA_DIR=${{ github.workspace }}/deps/skia `
           -DSKIA_RELEASE=true `
+          -DENABLE_TESTS=OFF `
+          -DENABLE_UI=ON `
+          -DENABLE_UPDATER=OFF `
           ..
 
     - name: Build Aseprite
       working-directory: build
-      run: ninja aseprite
-
-    - name: Create Output Directory
-      run: mkdir build-output
-
-    - name: Copy Build Artifacts
       run: |
-        copy build\bin\aseprite.exe build-output\
-        copy build\bin\*.dll build-output\
+        ninja aseprite
+        dir bin
+
+    - name: Prepare Artifacts
+      shell: cmd
+      run: |
+        mkdir dist
+        copy build\bin\aseprite.exe dist\
+        if exist build\bin\*.dll copy build\bin\*.dll dist\
+        if exist deps\skia\*.dll copy deps\skia\*.dll dist\
+        dir dist
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: aseprite-windows
-        path: build-output
+        path: dist\*
+        if-no-files-found: error
