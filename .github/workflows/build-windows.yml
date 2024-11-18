@@ -1,0 +1,70 @@
+name: Build Aseprite for Windows
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Setup MSVC
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Install Ninja
+      uses: seanmiddleditch/gha-setup-ninja@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    # Download pre-built Skia from Aseprite's servers
+    - name: Download Skia
+      run: |
+        python -m pip install requests
+        python deps/skia/download.py
+
+    - name: Create Build Directory
+      run: mkdir build
+      
+    - name: Configure CMake
+      working-directory: build
+      run: |
+        cmake -G Ninja `
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+          -DLAF_BACKEND=skia `
+          -DSKIA_DIR=../deps/skia `
+          -DSKIA_RELEASE=true `
+          ..
+
+    - name: Build Aseprite
+      working-directory: build
+      run: ninja aseprite
+
+    - name: Create Output Directory
+      run: mkdir build-output
+
+    - name: Copy Build Artifacts
+      run: |
+        copy build\bin\aseprite.exe build-output\
+        copy build\bin\*.dll build-output\
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: aseprite-windows
+        path: build-output
